@@ -1,0 +1,2356 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预警规则列表 - 智鲲营销云</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #3B82F6;
+            --secondary-color: #63A3FB;
+            --accent-color: #DBEAFE;
+            --light-color: #F8FAFC;
+            --dark-color: #1E40AF;
+            --neutral-color: #64748B;
+            --text-color: #000000;
+            --bg-light: #ffffff;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --footer-bg: #F8FAFC;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --border-color: #E2E8F0;
+            --shadow-sm: 0 2px 5px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 10px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.1);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --success-color: #10B981;
+            --danger-color: #EF4444;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --text-light: #94A3B8;
+            --light-bg: #F8FAFC;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+        
+        html, body {
+            background-color: var(--bg-light);
+            font-size: 14px;
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+        
+        body {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background-color: #F1F5F9;
+        }
+
+        .header {
+            background: var(--header-bg);
+            color: var(--text-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--header-shadow);
+            border-bottom: 1px solid #F1F5F9;
+        }
+
+        .top-menu {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            padding: 0 20px;
+            height: 70px;
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-right: 30px;
+        }
+
+        .logo-left {
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+        }
+
+        .logo-left img {
+            height: 30px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .system-name {
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            white-space: nowrap;
+        }
+
+        .nav-container {
+            flex: 1;
+            display: flex;
+            justify-content: flex-start;
+            overflow-x: auto;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .nav-container::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            height: 100%;
+            padding: 0;
+            margin: 0;
+            justify-content: flex-start;
+            min-width: max-content;
+        }
+
+        .nav-item {
+            position: relative;
+            padding: 0 16px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            z-index: 1001;
+            font-size: 14px;
+            white-space: nowrap;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .nav-item:hover {
+            color: var(--primary-color);
+            background-color: var(--accent-color);
+        }
+
+        .nav-item.has-dropdown::after {
+            content: "▼";
+            font-size: 9px;
+            margin-left: 6px;
+            transition: transform 0.3s;
+            color: var(--text-color);
+        }
+
+        .nav-item.has-dropdown:hover::after {
+            transform: rotate(180deg);
+            color: var(--primary-color);
+        }
+
+        .dropdown-panel {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: var(--hover-shadow);
+            display: none;
+            color: var(--text-color);
+            z-index: 1000;
+            border-radius: 0 0 var(--border-radius) var(--border-radius);
+            width: 100%;
+            max-height: calc(100vh - 80px);
+            overflow-y: auto;
+            padding: 20px;
+            margin: 0 auto;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .dropdown-content {
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            width: 100%;
+            margin: 0 auto;
+            max-width: 90%;
+        }
+
+        .dropdown-section {
+            min-width: 200px;
+            flex: 0 0 auto;
+            max-width: 250px;
+        }
+
+        .dropdown-section h4 {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-weight: 600;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .dropdown-section h4 i {
+            margin-right: 8px;
+            font-size: 15px;
+            color: var(--primary-color);
+        }
+
+        .dropdown-links {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .dropdown-links a {
+            display: flex;
+            align-items: center;
+            padding: 10px 12px;
+            text-decoration: none;
+            color: var(--text-color);
+            border-radius: 8px;
+            transition: all 0.2s;
+            white-space: nowrap;
+            font-size: 14px;
+        }
+
+        .dropdown-links a:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+            padding-left: 16px;
+        }
+
+        .dropdown-links a i {
+            margin-right: 10px;
+            width: 18px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        .dropdown-description {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            width: 300px;
+            padding: 20px;
+            background: var(--light-color);
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .dropdown-links a:hover + .dropdown-description,
+        .dropdown-description:hover {
+            display: block;
+        }
+
+        .description-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--primary-color);
+        }
+
+        .description-content {
+            font-size: 13px;
+            color: var(--text-color);
+            line-height: 1.5;
+        }
+
+        .login-section {
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+            margin-left: 20px;
+        }
+
+        .user-info {
+            position: relative;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .user-info:hover {
+            background-color: var(--accent-color);
+        }
+
+        .user-avatar {
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-weight: bold;
+            color: white;
+            font-size: 15px;
+        }
+
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            width: 180px;
+            padding: 10px 0;
+            display: none;
+            z-index: 1000;
+            color: var(--text-color);
+        }
+
+        .user-dropdown a {
+            display: flex;
+            align-items: center;
+            padding: 10px 15px;
+            text-decoration: none;
+            color: var(--text-color);
+            transition: background-color 0.2s;
+            font-size: 14px;
+        }
+
+        .user-dropdown a:hover {
+            background-color: var(--accent-color);
+            color: var(--primary-color);
+        }
+
+        .user-dropdown a i {
+            margin-right: 10px;
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+            color: var(--primary-color);
+        }
+
+        .user-info:hover .user-dropdown {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            margin-top: 0;
+        }
+
+        .sidebar {
+            width: 200px;
+            background-color: #fff;
+            border-right: 1px solid var(--border-color);
+            flex-shrink: 0;
+            height: calc(100vh - 60px);
+            position: sticky;
+            top: 60px;
+            overflow-y: auto;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .sidebar-header {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 13px;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-menu-item {
+            position: relative;
+        }
+
+        .sidebar-menu-link {
+            display: flex;
+            align-items: center;
+            padding: 10px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .sidebar-menu-link i {
+            margin-right: 8px;
+            width: 16px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .sidebar-menu-link:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+        }
+
+        .sidebar-menu-link.active {
+            background-color: #f0f5ff;
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        .sidebar-menu-link.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: var(--primary-color);
+        }
+
+		.main-content {
+            max-width: 90%;
+            margin: 30px auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 180px;
+            }
+            
+            .main-content {
+                max-width: calc(100% - 180px);
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 0;
+                overflow: hidden;
+                position: fixed;
+                z-index: 999;
+            }
+            
+            .sidebar.show {
+                width: 220px;
+            }
+            
+            .main-content {
+                max-width: 100%;
+                width: 100%;
+                padding: 12px 8px;
+            }
+            
+            .mobile-menu-toggle {
+                display: block !important;
+            }
+        }
+
+        .mobile-menu-toggle {
+            display: none;
+            position: fixed;
+            left: 10px;
+            top: 70px;
+            z-index: 998;
+            background-color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            box-shadow: var(--shadow-sm);
+            border: none;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-color);
+            font-size: 14px;
+        }
+
+        .page-title {
+            color: var(--primary-color);
+            margin-bottom: 12px;
+            font-size: 1.4rem;
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+        }
+
+        .page-title i {
+            margin-right: 6px;
+            color: var(--secondary-color);
+            font-size: 1.2rem;
+        }
+
+        .breadcrumbs {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 12px;
+        }
+
+        .breadcrumbs a {
+            color: var(--secondary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumbs a:hover {
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .breadcrumbs span {
+            margin: 0 5px;
+            color: var(--text-light);
+        }
+
+        .page-desc {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            font-size: 12px;
+            padding-left: 2px;
+        }
+
+        .page-desc span {
+            color: var(--secondary-color);
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 2px;
+        }
+
+        .page-desc span:hover {
+            color: var(--primary-color);
+        }
+
+        .stats-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: var(--radius-md);
+            padding: 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--hover-shadow);
+        }
+
+        .stat-card-title {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 8px;
+        }
+
+        .stat-card-value {
+            color: var(--primary-color);
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        .stat-card-change {
+            margin-top: 4px;
+            font-size: 12px;
+        }
+
+        .stat-card-change.positive {
+            color: var(--success-color);
+        }
+
+        .stat-card-change.negative {
+            color: var(--danger-color);
+        }
+
+        .quick-actions {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .quick-action-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            background-color: white;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .quick-action-btn:hover {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+            background-color: var(--accent-color);
+        }
+
+        .filter-card {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .filter-group {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
+            min-width: 180px;
+        }
+
+        .filter-group.brand-filter-group {
+            flex: 0 0 180px;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+        }
+
+        .filter-input-container {
+            flex: 1;
+            position: relative;
+        }
+
+        select.form-control, input.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding: 7px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            min-height: 34px;
+            width: 100%;
+            transition: border-color 0.3s;
+        }
+        
+        select.form-control:focus, input.form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.3);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+            white-space: nowrap;
+            margin-left: auto;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            font-size: 13px;
+        }
+
+        .btn i {
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #152255, #244a68);
+            box-shadow: var(--shadow-sm);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background-color: var(--light-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #eee;
+            border-color: #ccc;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        .btn-danger {
+            background-color: #f87171;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #ef4444;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .batch-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn.delete-btn {
+            color: #e74c3c;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            overflow: hidden;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px 14px;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .data-table th:nth-child(1),
+        .data-table td:nth-child(1),
+        .data-table th:nth-child(2),
+        .data-table td:nth-child(2),
+        .data-table th:last-child,
+        .data-table td:last-child {
+            white-space: nowrap;
+			min-width: 120px;
+        }
+		
+		.data-table th:nth-child(3),
+		.data-table td:nth-child(3) {
+			min-width: 180px;
+			max-width: 300px;
+		}
+
+		.data-table th:nth-child(4),
+		.data-table td:nth-child(4),
+		.data-table th:nth-child(5),
+		.data-table td:nth-child(5) {
+			min-width: 400px;
+			max-width: 400px;
+		}
+
+
+        .data-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-primary);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.2s;
+            border-bottom: 1px solid #f5f5f5;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: #fafbfc;
+        }
+
+        .rule-description,
+        .time-description {
+            max-width: 300px !important;
+			white-space: nowrap !important;
+			overflow: hidden !important;
+			text-overflow: ellipsis !important;
+			position: relative !important;
+			cursor: default !important;
+			line-height: 1.5 !important;
+        }
+
+        .data-table th:nth-child(3),
+        .data-table td:nth-child(3) {
+            min-width: 180px;
+        }
+
+        .rule-tooltip {
+            position: absolute;
+            background-color: #000000;
+            color: #ffffff;
+            padding: 10px 14px;
+            border-radius: 6px;
+            max-width: 500px;
+            white-space: normal;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            font-size: 0.85rem;
+            line-height: 1.6;
+            word-break: break-all;
+            display: none;
+            pointer-events: none;
+        }
+
+        .rule-tooltip::before {
+            content: "";
+            position: absolute;
+            border: 6px solid transparent;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        .rule-tooltip.right::before {
+            left: -12px;
+            border-right-color: #000000;
+            border-left-color: transparent;
+        }
+
+        .rule-tooltip.left::before {
+            right: -12px;
+            border-left-color: #000000;
+            border-right-color: transparent;
+        }
+
+        .action-buttons-table {
+            display: flex;
+            gap: 8px;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            color: var(--secondary-color);
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            transition: background-color 0.2s;
+            display: inline-flex;
+            align-items: center;
+            font-size: 12px;
+        }
+
+        .action-btn:hover {
+            background-color: #f0f5ff;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 16px;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-info {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .page-size-selector {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .page-size {
+            width: 70px !important;
+            padding: 5px 8px !important;
+            font-size: 12px !important;
+        }
+
+        .pagination-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .pagination-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            background-color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .pagination-btn:hover:not(.active):not(:disabled) {
+            border-color: var(--secondary-color);
+            color: var(--secondary-color);
+        }
+
+        .pagination-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .pagination-btn:disabled {
+            color: #ccc;
+            border-color: #eee;
+            cursor: not-allowed;
+            background-color: #fafbfc;
+        }
+
+        .page-jump {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .jump-input {
+            width: 50px !important;
+            padding: 5px 8px !important;
+            font-size: 12px !important;
+            text-align: center;
+        }
+
+        .jump-btn {
+            padding: 5px 10px !important;
+            font-size: 12px !important;
+        }
+
+		/* 页脚样式 */
+        .footer {
+            background-color: var(--footer-bg);
+            color: var(--text-color);
+            padding: 24px 0;
+            text-align: center;
+            margin-top: auto;
+            border-top: 1px solid #F1F5F9;
+        }
+
+        .footer-content {
+            max-width: 90%; /* 修改为90%宽度 */
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .footer-content > p {
+            font-size: 14px;
+            margin-bottom: 12px;
+            color: var(--text-color);
+        }
+
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            margin-top: 0;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+            gap: 8px 15px;
+        }
+
+        .footer-links a {
+            color: var(--text-color);
+            font-size: 13px;
+            text-decoration: none;
+            transition: color 0.3s;
+            margin: 0;
+        }
+
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+
+        .copyright {
+            margin-top: 0;
+            color: var(--text-color);
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .filter-row {
+                flex-direction: column;
+                align-items: stretch;
+                overflow-x: auto;
+                padding-bottom: 6px;
+                gap: 14px;
+            }
+            
+            .filter-actions {
+                margin-left: 0;
+                justify-content: flex-start;
+            }
+            
+            .filter-group,
+            .filter-group.brand-filter-group {
+                width: 100%;
+                flex: 1 0 100%;
+            }
+            
+            .filter-row::-webkit-scrollbar {
+                height: 3px;
+            }
+            
+            .filter-row::-webkit-scrollbar-thumb {
+                background: #ddd;
+                border-radius: 3px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+            
+            .batch-actions {
+                width: 100%;
+                justify-content: flex-start;
+                flex-wrap: wrap;
+            }
+            
+            .data-table {
+                display: block;
+                overflow-x: auto;
+            }
+            
+            .rule-description,
+            .time-description {
+                max-width: 180px;
+            }
+            
+            .pagination {
+                gap: 10px;
+            }
+            
+            .page-jump {
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .footer {
+                padding: 16px 0;
+            }
+            
+            .footer-links {
+                gap: 5px 8px;
+            }
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+           100% { transform: rotate(360deg); }
+        }
+
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            z-index: 3000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s, transform 0.3s;
+            max-width: 280px;
+            font-size: 13px;
+        }
+
+        .toast-message.error {
+            background-color: var(--danger-color);
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* 修改抽屉样式 - 去掉滑动效果 */
+        .drawer-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: none;
+        }
+        
+        .drawer-container.show {
+            display: block;
+        }
+        
+        .drawer-backdrop {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+        }
+        
+        .drawer-content {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            background-color: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            /* 去掉滑动动画效果 */
+            /* transform: translateX(100%); */
+            /* transition: transform 0.3s ease; */
+            overflow: hidden;
+        }
+        
+        /* 去掉滑动动画 */
+        /* .drawer-container.show .drawer-content {
+            transform: translateX(0);
+        } */
+        
+        .drawer-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .confirm-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 4000;
+        }
+
+        .confirm-modal.show {
+            display: flex;
+        }
+
+        .confirm-content {
+            background-color: white;
+            border-radius: var(--radius-md);
+            width: 100%;
+            max-width: 360px;
+            padding: 20px;
+            box-shadow: var(--shadow-lg);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .confirm-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 14px;
+            text-align: center;
+        }
+
+        .confirm-message {
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.5;
+            font-size: 13px;
+        }
+
+        .confirm-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .confirm-btn {
+            padding: 7px 20px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 智鲲营销云公共头部 -->
+    <header class="header">
+        <div class="top-menu">
+            <!-- Logo和系统名称 - 最左侧 -->
+            <div class="logo-container">
+                <div class="logo-left">
+                    <img src="./img/logo-removebg-preview.png" alt="智鲲营销云LOGO">
+                </div>
+                <div class="system-name">智鲲营销云</div>
+            </div>
+            
+<!-- 导航菜单容器 - 中间区域，用于居中导航菜单 -->
+            <div class="nav-container">
+                <!-- 导航菜单 - 中间 -->
+                <ul class="nav-menu">
+                    <li class="nav-item"><a href="first_page.html" style="color: inherit; text-decoration: none;" class="nav-link" data-target="first_page.html">首页</a></li>
+                    
+                    <li class="nav-item has-dropdown">
+                        智能托管
+                        <div class="dropdown-panel">
+                            <div class="dropdown-content">
+                                <div class="dropdown-section">
+                                    <h4>快车</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">快车-关键词</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">快车-人群</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">快车-智能化</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">快车投放管理</div>
+                                        <div class="description-content">京东快车是京东站内核心的推广工具，通过关键词、人群定向和智能投放等多种方式，帮助商家精准触达目标客户，提升商品曝光和转化率。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- 菜单2：营销创意 -->
+                    <li class="nav-item has-dropdown">
+                        营销创意
+                        <div class="dropdown-panel">
+                            <div class="dropdown-content">
+                                <div class="dropdown-section">
+                                    <h4>创意管理</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">创意库</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">创意分析</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">AB测试</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">创意管理</div>
+                                        <div class="description-content">集中管理所有营销创意素材，分析创意效果数据，通过A/B测试找到最优创意方案，提升广告点击率和转化率。</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-section">
+                                    <h4>素材管理</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">图片素材</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">视频素材</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">文案库</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">素材管理</div>
+                                        <div class="description-content">统一管理所有营销素材，包括图片、视频和文案，支持分类、标签和版本管理，方便快速查找和使用。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- 菜单3：投放预警 -->
+                    <li class="nav-item has-dropdown">
+                        投放预警
+                        <div class="dropdown-panel">
+                            <div class="dropdown-content">
+                                <div class="dropdown-section">
+                                    <h4>监控中心</h4>
+                                    <div class="dropdown-links">
+                                        <a href="ZKYX_waring_brand.html" class="nav-link" data-target="ZKYX_waring_brand.html">品牌预警</a>
+                                        <a href="ZKYX_waring_plan.html" class="nav-link" data-target="ZKYX_waring_plan.html">计划预警</a>
+                                        <a href="ZKYX_waring_ratio.html" class="nav-link" data-target="ZKYX_waring_ratio.html">费比预警</a>
+										<a href="ZKYX_waring_message.html" class="nav-link" data-target="ZZKYX_waring_message.html">预警通知</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">监控中心</div>
+                                        <div class="description-content">实时监控广告投放状态，对预算消耗、效果指标和异常情况进行预警，确保广告投放顺利进行。</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-section">
+                                    <h4>预警设置</h4>
+                                    <div class="dropdown-links">
+                                        <a href="ZKYX_waring_rule.html" class="nav-link" data-target="ZKYX_waring_rule.html" style="color: inherit;">规则配置</a>
+                                        <a href="ZKYX_waring_rule_notification.html" class="nav-link" data-target="ZKYX_waring_rule_notification.html">通知管理</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">预警设置</div>
+                                        <div class="description-content">自定义预警规则和通知方式，设置预算、ROI、CPC等关键指标的阈值，系统自动监控并发送预警通知。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- 菜单4：创意工具 -->
+                    <li class="nav-item has-dropdown">
+                        创意工具
+                        <div class="dropdown-panel">
+                            <div class="dropdown-content">
+                                <div class="dropdown-section">
+                                    <h4>设计工具</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">智能生成</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">模板中心</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">尺寸适配</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">设计工具</div>
+                                        <div class="description-content">提供智能创意生成、模板库和尺寸适配等功能，帮助快速制作高质量广告素材，提升创意制作效率。</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-section">
+                                    <h4>文案工具</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">文案助手</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">热门文案</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">关键词推荐</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">文案工具</div>
+                                        <div class="description-content">AI辅助文案创作，提供热门文案参考和关键词推荐，帮助创作更具吸引力的广告文案，提升点击率。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+
+                    <!-- 菜单5：策略中心 -->
+                    <li class="nav-item has-dropdown">
+                        策略中心
+                        <div class="dropdown-panel">
+                            <div class="dropdown-content">
+                                <div class="dropdown-section">
+                                    <h4>投放策略</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">策略库</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">策略推荐</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">效果分析</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">投放策略</div>
+                                        <div class="description-content">积累和分享成功投放策略，基于大数据和AI算法提供个性化策略推荐，并通过效果分析持续优化策略效果。</div>
+                                    </div>
+                                </div>
+                                <div class="dropdown-section">
+                                    <h4>优化建议</h4>
+                                    <div class="dropdown-links">
+                                        <a href="#" class="nav-link" data-target="first_page.html">自动化优化</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">人工建议</a>
+                                        <a href="#" class="nav-link" data-target="first_page.html">行业洞察</a>
+                                    </div>
+                                    <div class="dropdown-description">
+                                        <div class="description-title">优化建议</div>
+                                        <div class="description-content">提供自动化优化、专家人工建议和行业洞察报告，帮助持续优化广告投放效果，提升ROI。</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <a href="dashboard.html" target="_blank" style="color: inherit; text-decoration: none;" class="nav-link" data-target="dashboard.html">投放看板</a>
+                    </li>
+                </ul>
+            </div>
+            
+            <!-- 用户信息 - 直接显示登录状态 -->
+            <div class="login-section">
+                <div class="user-info" id="user-info">
+                    <div class="user-avatar"><i class="fas fa-user-circle"></i></div>
+                    <span id="username-display">qizhongming</span>
+                    <div class="user-dropdown">
+                        <a href="#"><i class="fas fa-user"></i> 个人资料</a>
+                        <a href="#"><i class="fas fa-cog"></i> 账户设置</a>
+                        <a href="#"><i class="fas fa-bell"></i> 消息通知</a>
+                        <a href="home_page.html" id="logout-link"><i class="fas fa-sign-out-alt"></i> 退出登录</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主内容区布局 -->
+    <div class="content-wrapper">
+        <!-- 左侧导航菜单 -->
+        <aside class="sidebar">
+            <div class="sidebar-header">预警设置</div>
+            <ul class="sidebar-menu">
+                <li class="sidebar-menu-item">
+                    <a href="warning_rules_main_page.html" class="sidebar-menu-link active">
+                        <i class="fas fa-list-alt"></i>
+                        规则配置
+                    </a>
+                </li>
+                <li class="sidebar-menu-item">
+                    <a href="ZKYX_waring_rule_notification.html" class="sidebar-menu-link">
+                        <i class="fas fa-bell"></i>
+                        通知管理
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 移动端菜单切换按钮 -->
+        <button class="mobile-menu-toggle" id="mobile-menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+
+        <!-- 主内容区域 -->
+        <main class="main-content">
+            <h1 class="page-title">预警规则列表</h1>
+			<div class="page-desc">
+                在本页面设置预警的统一规则，可以指定预警频次/时间，还可以指定预警、不预警的统一规则(达到一定标准触发预警/忽略预警)。
+            </div>
+            <div class="page-desc">
+                配置预警规则后，可在<a href="ZKYX_waring_brand.html"><span style="font-weight: bold;">监控中心</span></a>中绑定具体投放预警逻辑，规则修改将实时同步至监控逻辑；规则删除后,配置绑定的预警逻辑将不再生效。
+            </div>
+            <div class="breadcrumbs">
+                <span>投放预警</span>
+                <span>›</span>
+                <span>预警设置</span>
+                <span>›</span>
+                <span>规则配置</span>
+            </div>
+            
+            <!-- 筛选区域 -->
+            <div class="filter-card">
+                <div class="filter-row">
+                    <!-- 品牌筛选 -->
+                    <div class="filter-group brand-filter-group">
+                        <span class="filter-label">品牌:</span>
+                        <div class="filter-input-container">
+                            <select class="form-control" id="brand-filter" required>
+                                <option value="" disabled selected>请选择品牌</option>
+                                <option value="1">菲婷丝</option>
+                                <option value="2">波司登</option>
+                                <option value="3">施华蔻</option>
+                                <option value="4">MD</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <!-- 规则名称筛选 -->
+                    <div class="filter-group">
+                        <span class="filter-label">规则名称:</span>
+                        <div class="filter-input-container">
+                            <input type="text" class="form-control" id="rule-name-filter" placeholder="请输入规则名称关键词">
+                        </div>
+                    </div>
+                    
+                    <!-- 查询和重置按钮 -->
+                    <div class="filter-actions">
+                        <button class="btn btn-primary" id="search-btn">
+                            <i class="fas fa-search"></i>查询
+                        </button>
+                        <button class="btn btn-secondary" id="reset-btn">
+                            <i class="fas fa-sync-alt"></i>重置
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 操作按钮区域 -->
+            <div class="action-buttons">
+                <div class="batch-actions">
+                    <button class="btn btn-secondary" id="export-rules">
+                        <i class="fas fa-download"></i>导出规则
+                    </button>
+                </div>
+                
+                <button class="btn btn-primary" id="add-new-rule">
+                    <i class="fas fa-plus"></i>新增规则
+                </button>
+            </div>
+            
+            <!-- 规则列表表格 -->
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>品牌</th>
+                            <th>规则名称</th>
+                            <th>预警时间</th>
+                            <th>免预警规则描述</th>
+                            <th>强制预警规则描述</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="rules-table-body">
+                        <!-- 规则数据将通过JavaScript动态生成 -->
+                    </tbody>
+                </table>
+                
+                <!-- 分页 -->
+                <div class="pagination">
+                    <!-- 总条数/总页数信息 -->
+                    <div class="pagination-info">
+                        共 <span id="total-count">5</span> 条 / <span id="total-pages">1</span> 页
+                    </div>
+                    
+                    <!-- 每页条数选择 -->
+                    <div class="page-size-selector">
+                        <label>每页：</label>
+                        <select id="page-size" class="form-control page-size">
+                            <option value="10">10条</option>
+                            <option value="20" selected>20条</option>
+                            <option value="50">50条</option>
+                        </select>
+                    </div>
+                    
+                    <!-- 分页按钮 -->
+                    <div class="pagination-buttons">
+                        <button class="pagination-btn" id="prev-page" disabled>
+                            <i class="fas fa-chevron-left"></i>
+                        </button>
+                        <button class="pagination-btn active" data-page="1">1</button>
+                        <button class="pagination-btn" id="next-page" disabled>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <!-- 页码跳转 -->
+                    <div class="page-jump">
+                        <span>跳至</span>
+                        <input type="number" id="jump-page" min="1" max="1" value="1" class="form-control jump-input">
+                        <span>页</span>
+                        <button id="jump-btn" class="btn btn-secondary jump-btn">确定</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- 页脚 -->
+    <footer class="footer">
+        <div class="footer-content">
+            <p>智鲲营销云 - 让电商广告投放更高效</p>
+            <div class="footer-links">
+                <a href="#">关于我们</a>
+                <a href="#">帮助文档</a>
+                <a href="#">联系我们</a>
+                <a href="#">隐私政策</a>
+                <a href="#">服务条款</a>
+            </div>
+            <div class="copyright">
+                <p>© 2025-2026 智鲲科技有限公司 版权所有</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Tooltip容器 -->
+    <div class="rule-tooltip" id="rule-tooltip"></div>
+    
+    <!-- 修改为抽屉容器结构 -->
+    <div class="drawer-container" id="modal-container">
+        <div class="drawer-backdrop" id="modal-backdrop"></div>
+        <div class="drawer-content">
+            <iframe class="drawer-iframe" id="modal-iframe" src="ZKYX_waring_rule_model.html"></iframe>
+        </div>
+    </div>
+
+    <!-- 删除确认弹窗 -->
+    <div class="confirm-modal" id="delete-confirm-modal">
+        <div class="confirm-content">
+            <div class="confirm-title">确认删除</div>
+            <div class="confirm-message">
+                您确定要删除此预警规则吗？<br>
+                此操作不可撤销，请谨慎操作。
+            </div>
+            <div class="confirm-buttons">
+                <button class="confirm-btn btn btn-secondary" id="cancel-delete">取消</button>
+                <button class="confirm-btn btn btn-danger" id="confirm-delete">删除</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 加载状态 -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- 提示消息 -->
+    <div class="toast-message" id="toast-message"></div>
+
+    <script>
+        // 暴露toast方法给弹窗页面调用
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-message');
+            toast.textContent = message;
+            toast.className = 'toast-message';
+            if (type === 'error') {
+                toast.classList.add('error');
+            }
+            toast.classList.add('show');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // 新的规则数据结构，匹配抽屉页的最新逻辑
+        const ruleData = [
+            {
+                id: 1,
+                brand: "1",
+                name: "品牌A日常投放预警规则",
+                timeType: "specific",
+                timePoints: ["09:00", "12:00", "15:00", "18:00"],
+                noWarningConditions: {
+                    costLow: 100,
+                    progressLow: 10,
+                    roiGood: 80,
+                    cpcGood: 120,
+                    addcartGood: 120
+                },
+                forceWarningConditions: {
+                    spendDeviation: 50,
+                    roiLow: 50,
+                    cpcHigh: 180,
+                    addcartHigh: 180
+                }
+            },
+            {
+                id: 2,
+                brand: "1",
+                name: "品牌B大促期间预警规则",
+                timeType: "hourly",
+                timePoints: [],
+                noWarningConditions: {
+                    costLow: 200,
+                    progressLow: 15,
+                    roiGood: 70,
+                    cpcGood: 150,
+                    addcartGood: 150
+                },
+                forceWarningConditions: {
+                    spendDeviation: 60,
+                    roiLow: 40,
+                    cpcHigh: 200,
+                    addcartHigh: 200
+                }
+            },
+            {
+                id: 3,
+                brand: "1",
+                name: "品牌C新品推广预警规则",
+                timeType: "specific",
+                timePoints: ["10:00", "14:00", "16:00"],
+                noWarningConditions: {
+                    costLow: 150,
+                    progressLow: 20,
+                    roiGood: 90,
+                    cpcGood: 180,
+                    addcartGood: 180
+                },
+                forceWarningConditions: {
+                    spendDeviation: 70,
+                    roiLow: 30,
+                    cpcHigh: 220,
+                    addcartHigh: 220
+                }
+            },
+            {
+                id: 4,
+                brand: "4",
+                name: "品牌A清仓活动预警规则",
+                timeType: "specific",
+                timePoints: ["08:30", "11:30", "15:30", "17:30"],
+                noWarningConditions: {
+                    costLow: 300,
+                    progressLow: 25,
+                    roiGood: 60,
+                    cpcGood: 130,
+                    addcartGood: 130
+                },
+                forceWarningConditions: {
+                    spendDeviation: 80,
+                    roiLow: 20,
+                    cpcHigh: 250,
+                    addcartHigh: 250
+                }
+            },
+            {
+                id: 5,
+                brand: "2",
+                name: "品牌D常规预警规则",
+                timeType: "hourly",
+                timePoints: [],
+                noWarningConditions: {
+                    costLow: 80,
+                    progressLow: 5,
+                    roiGood: 85,
+                    cpcGood: 110,
+                    addcartGood: 110
+                },
+                forceWarningConditions: {
+                    spendDeviation: 40,
+                    roiLow: 60,
+                    cpcHigh: 150,
+                    addcartHigh: 150
+                }
+            }
+        ];
+
+        // 品牌映射
+        const brandMap = {
+            "1": "菲婷丝",
+            "2": "波司登",
+            "3": "施华蔻",
+            "4": "MD"
+        };
+
+        // 生成免预警条件描述
+        function generateNoWarningDescription(conditions) {
+            if (!conditions) return "未设置免预警条件";
+            
+            const parts = [];
+            
+            if (conditions.costLow) {
+                parts.push(`消耗金额≤${conditions.costLow}元`);
+            }
+            if (conditions.progressLow) {
+                parts.push(`消耗进度偏离≤${conditions.progressLow}%`);
+            }
+            if (conditions.roiGood) {
+                parts.push(`ROI≥${conditions.roiGood}%`);
+            }
+            if (conditions.cpcGood) {
+                parts.push(`CPC≤${conditions.cpcGood}%`);
+            }
+            if (conditions.addcartGood) {
+                parts.push(`加购成本≤${conditions.addcartGood}%`);
+            }
+            
+            return parts.length > 0 ? parts.join("; ") : "未设置免预警条件";
+        }
+
+        // 生成强制预警条件描述
+        function generateForceWarningDescription(conditions) {
+            if (!conditions) return "未设置强制预警条件";
+            
+            const parts = [];
+            
+            if (conditions.spendDeviation) {
+                parts.push(`消耗进度偏离≥${conditions.spendDeviation}%`);
+            }
+            if (conditions.roiLow) {
+                parts.push(`ROI≤${conditions.roiLow}%`);
+            }
+            if (conditions.cpcHigh) {
+                parts.push(`CPC≥${conditions.cpcHigh}%`);
+            }
+            if (conditions.addcartHigh) {
+                parts.push(`加购成本≥${conditions.addcartHigh}%`);
+            }
+            
+            return parts.length > 0 ? parts.join("; ") : "未设置强制预警条件";
+        }
+
+        // 生成时间描述
+        function generateTimeDescription(timeType, timePoints) {
+            if (timeType === "hourly") {
+                return "每小时";
+            } else if (timeType === "specific" && timePoints && timePoints.length > 0) {
+                return timePoints.join(", ");
+            }
+            return "未设置预警时间";
+        }
+
+        // 命名空间，避免全局变量污染
+        const WarningRulesApp = {
+            // 初始化应用
+            init: function() {
+                // 初始化变量
+                this.isLoggedIn = true; // 默认已登录
+                this.currentPage = 1;
+                this.pageSize = 20;
+                this.totalCount = ruleData.length;
+                this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+                this.currentDeleteId = null; // 当前要删除的规则ID
+                
+                // 初始化事件监听
+                this.setupEventListeners();
+                
+                // 渲染规则列表
+                this.renderRulesTable();
+                
+                // 更新分页状态
+                this.updatePaginationStatus();
+                
+                // 初始化消息监听，接收抽屉页面的消息
+                this.setupMessageListener();
+                
+                // 添加快捷操作功能
+                this.setupQuickActions();
+            },
+            
+            // 渲染规则列表
+            renderRulesTable: function() {
+                const tbody = document.getElementById('rules-table-body');
+                tbody.innerHTML = '';
+                
+                ruleData.forEach(rule => {
+                    const brandName = brandMap[rule.brand] || rule.brand;
+                    const timeDescription = generateTimeDescription(rule.timeType, rule.timePoints);
+                    const noWarningDescription = generateNoWarningDescription(rule.noWarningConditions);
+                    const forceWarningDescription = generateForceWarningDescription(rule.forceWarningConditions);
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${brandName}</td>
+                        <td>${rule.name}</td>
+                        <td class="time-description" data-full="${timeDescription}">${timeDescription.length > 30 ? timeDescription.substring(0, 30) + '...' : timeDescription}</td>
+                        <td class="rule-description" data-full="${noWarningDescription}">${noWarningDescription.length > 40 ? noWarningDescription.substring(0, 40) + '...' : noWarningDescription}</td>
+                        <td class="rule-description" data-full="${forceWarningDescription}">${forceWarningDescription.length > 40 ? forceWarningDescription.substring(0, 40) + '...' : forceWarningDescription}</td>
+                        <td>
+                            <div class="action-buttons-table">
+                                <button class="action-btn edit-rule" data-id="${rule.id}">
+                                    <i class="fas fa-edit"></i>编辑
+                                </button>
+                                <button class="action-btn copy-rule" data-id="${rule.id}">
+                                    <i class="fas fa-copy"></i>复制
+                                </button>
+                                <button class="action-btn delete-btn" data-id="${rule.id}">
+                                    <i class="fas fa-trash"></i>删除
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                
+                this.bindTableEvents();
+				this.setupTooltip();
+            },
+            
+            // 绑定表格事件
+            bindTableEvents: function() {
+                // 编辑规则按钮
+                document.querySelectorAll('.edit-rule').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const ruleId = parseInt(e.currentTarget.getAttribute('data-id'));
+                        this.openDrawer('edit', ruleId);
+                    });
+                });
+                
+                // 复制规则按钮
+                document.querySelectorAll('.copy-rule').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const ruleId = parseInt(e.currentTarget.getAttribute('data-id'));
+                        this.openDrawer('copy', ruleId);
+                    });
+                });
+                
+                // 删除按钮点击事件
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.currentDeleteId = parseInt(e.currentTarget.getAttribute('data-id'));
+                        document.getElementById('delete-confirm-modal').classList.add('show');
+                    });
+                });
+            },
+            
+            // 设置事件监听
+            setupEventListeners: function() {
+                // 移动端菜单切换
+                document.getElementById('mobile-menu-toggle').addEventListener('click', () => {
+                    document.querySelector('.sidebar').classList.toggle('show');
+                });
+                
+                // 点击主内容区域关闭移动端菜单
+                document.querySelector('.main-content').addEventListener('click', () => {
+                    if (window.innerWidth <= 768) {
+                        document.querySelector('.sidebar').classList.remove('show');
+                    }
+                });
+                
+                // 窗口大小变化时处理菜单显示
+                window.addEventListener('resize', () => {
+                    if (window.innerWidth > 768) {
+                        document.querySelector('.sidebar').classList.remove('show');
+                    }
+                });
+                
+                // 下拉菜单的显示与隐藏逻辑
+                const dropdownItems = document.querySelectorAll('.nav-item.has-dropdown');
+                
+                dropdownItems.forEach(item => {
+                    const panel = item.querySelector('.dropdown-panel');
+                    let hideTimer;
+                    
+                    // 鼠标进入菜单项时显示面板
+                    item.addEventListener('mouseenter', () => {
+                        // 清除可能存在的隐藏计时器
+                        clearTimeout(hideTimer);
+                        // 显示当前面板前先隐藏所有其他面板
+                        document.querySelectorAll('.dropdown-panel').forEach(p => {
+                            if (p !== panel) p.style.display = 'none';
+                        });
+                        // 显示当前面板
+                        panel.style.display = 'block';
+                        panel.classList.add('active');
+                    });
+                    
+                    // 鼠标离开菜单项时设置延迟隐藏
+                    item.addEventListener('mouseleave', () => {
+                        hideTimer = setTimeout(() => {
+                            panel.style.display = 'none';
+                            panel.classList.remove('active');
+                        }, 300); // 300ms延迟，给用户足够时间移动到面板
+                    });
+                    
+                    // 鼠标进入面板时取消隐藏
+                    if (panel) {
+                        panel.addEventListener('mouseenter', () => {
+                            clearTimeout(hideTimer);
+                            panel.style.display = 'block';
+                            panel.classList.add('active');
+                        });
+                        
+                        // 鼠标离开面板时隐藏
+                        panel.addEventListener('mouseleave', () => {
+                            panel.style.display = 'none';
+                            panel.classList.remove('active');
+                        });
+                    }
+                });
+                
+                // 点击页面其他区域隐藏所有下拉面板
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.nav-item.has-dropdown') && 
+                        !e.target.closest('.dropdown-panel')) {
+                        document.querySelectorAll('.dropdown-panel').forEach(panel => {
+                            panel.style.display = 'none';
+                            panel.classList.remove('active');
+                        });
+                    }
+                });
+
+                // 筛选按钮
+                document.getElementById('search-btn').addEventListener('click', () => this.applyFilters());
+                document.getElementById('reset-btn').addEventListener('click', () => this.resetFilters());
+                
+                // 导出规则
+                document.getElementById('export-rules').addEventListener('click', () => this.exportRules());
+                
+                // 分页按钮
+                document.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        this.currentPage = parseInt(e.currentTarget.getAttribute('data-page'));
+                        this.goToPage(this.currentPage);
+                    });
+                });
+                
+                // 上一页/下一页
+                document.getElementById('prev-page').addEventListener('click', () => {
+                    if (this.currentPage > 1) {
+                        this.goToPage(this.currentPage - 1);
+                    }
+                });
+                
+                document.getElementById('next-page').addEventListener('click', () => {
+                    if (this.currentPage < this.totalPages) {
+                        this.goToPage(this.currentPage + 1);
+                    }
+                });
+                
+                // 页码跳转
+                document.getElementById('jump-btn').addEventListener('click', () => {
+                    const page = parseInt(document.getElementById('jump-page').value);
+                    if (page && page >= 1 && page <= this.totalPages) {
+                        this.goToPage(page);
+                    }
+                });
+                
+                // 每页条数变化
+                document.getElementById('page-size').addEventListener('change', (e) => {
+                    this.pageSize = parseInt(e.target.value);
+                    this.currentPage = 1;
+                    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+                    this.goToPage(1);
+                });
+                
+                // 退出登录 - 跳转到home.html
+                document.getElementById('logout-link').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    window.location.href = 'home_page.html';
+                });
+                
+                // Tooltip 功能
+                this.setupTooltip();
+                
+                // 新增规则按钮
+                document.getElementById('add-new-rule').addEventListener('click', () => {
+                    this.openDrawer('add');
+                });
+                
+                // 取消删除
+                document.getElementById('cancel-delete').addEventListener('click', () => {
+                    document.getElementById('delete-confirm-modal').classList.remove('show');
+                    this.currentDeleteId = null;
+                });
+                
+                // 确认删除
+                document.getElementById('confirm-delete').addEventListener('click', () => {
+                    document.getElementById('delete-confirm-modal').classList.remove('show');
+                    // 显示提示信息，不实际删除数据
+                    showToast('规则删除成功');
+                    this.currentDeleteId = null;
+                });
+                
+                // 点击删除弹窗外部关闭弹窗
+                document.getElementById('delete-confirm-modal').addEventListener('click', (e) => {
+                    if (e.target === document.getElementById('delete-confirm-modal')) {
+                        document.getElementById('delete-confirm-modal').classList.remove('show');
+                        this.currentDeleteId = null;
+                    }
+                });
+                
+                // 添加遮罩层点击关闭抽屉事件
+                document.getElementById('modal-backdrop').addEventListener('click', () => {
+                    this.closeDrawer();
+                });
+            },
+            
+            // 设置快捷操作功能
+            setupQuickActions: function() {
+                // 如果存在快速操作按钮，添加事件
+                const quickTemplateBtn = document.getElementById('quick-template');
+                const quickCopyBtn = document.getElementById('quick-copy');
+                const quickTestBtn = document.getElementById('quick-test');
+                
+                if (quickTemplateBtn) {
+                    quickTemplateBtn.addEventListener('click', () => {
+                        this.showLoading();
+                        setTimeout(() => {
+                            this.hideLoading();
+                            showToast('已应用默认规则模板');
+                        }, 800);
+                    });
+                }
+                
+                if (quickCopyBtn) {
+                    quickCopyBtn.addEventListener('click', () => {
+                        this.showLoading();
+                        setTimeout(() => {
+                            this.hideLoading();
+                            showToast('已复制选中规则');
+                        }, 800);
+                    });
+                }
+                
+                if (quickTestBtn) {
+                    quickTestBtn.addEventListener('click', () => {
+                        this.showLoading();
+                        setTimeout(() => {
+                            this.hideLoading();
+                            showToast('规则测试完成');
+                        }, 1000);
+                    });
+                }
+            },
+            
+            // 打开抽屉页面
+            openDrawer: function(action, ruleId = null) {
+                const modalContainer = document.getElementById('modal-container');
+                const iframe = document.getElementById('modal-iframe');
+                
+                // 根据操作类型和规则ID构建URL参数
+                let urlParams = `?action=${action}`;
+                
+                // 如果是编辑或复制操作，添加规则数据参数
+                if (ruleId) {
+                    const rule = ruleData.find(r => r.id === ruleId);
+                    if (rule) {
+                        urlParams += `&data=${encodeURIComponent(JSON.stringify(rule))}`;
+                    }
+                }
+                
+                // 设置iframe的src
+                iframe.src = `ZKYX_waring_rule_model.html${urlParams}`;
+                
+                // 显示抽屉容器
+                modalContainer.classList.add('show');
+            },
+            
+            // 关闭抽屉页面
+            closeDrawer: function() {
+                const modalContainer = document.getElementById('modal-container');
+                modalContainer.classList.remove('show');
+                
+                // 清空iframe内容，避免缓存
+                document.getElementById('modal-iframe').src = '';
+            },
+            
+            // 设置消息监听，接收来自抽屉页面的消息
+            setupMessageListener: function() {
+                const that = this;
+                window.addEventListener('message', function(event) {
+                    // 验证消息来源（实际应用中应验证具体域名）
+                    if (event.data.type === 'ruleSaved') {
+                        // 规则保存成功，刷新列表
+                        that.refreshRuleList(event.data);
+                        that.closeDrawer();
+                        showToast('规则保存成功');
+                    } else if (event.data.type === 'closeDrawer') {
+                        // 关闭抽屉
+                        that.closeDrawer();
+                    }
+                }, false);
+            },
+            
+            // 刷新规则列表（模拟）
+            refreshRuleList: function(savedData) {
+                // 这里只是模拟刷新，实际应用中应该从服务器重新获取数据
+                console.log('刷新规则列表:', savedData);
+                
+                // 简单模拟：如果是新增操作，更新总条数
+                if (savedData.action === 'add') {
+                    const totalCountEl = document.getElementById('total-count');
+                    totalCountEl.textContent = parseInt(totalCountEl.textContent) + 1;
+                    
+                    this.totalCount = parseInt(totalCountEl.textContent);
+                    this.totalPages = Math.ceil(this.totalCount / this.pageSize);
+                    this.updatePaginationStatus();
+                }
+                
+                // 重新渲染表格
+                this.renderRulesTable();
+            },
+            
+            // 应用筛选条件 - 增加品牌必选验证
+            applyFilters: function() {
+                // 验证品牌是否已选择
+                const brandSelect = document.getElementById('brand-filter');
+                if (!brandSelect.value) {
+                    showToast('请选择品牌', 'error');
+                    return;
+                }
+                
+                this.showLoading();
+                
+                // 模拟筛选过程
+                setTimeout(() => {
+                    // 这里可以添加实际的筛选逻辑
+                    this.hideLoading();
+                    showToast('筛选完成');
+                }, 800);
+            },
+            
+            // 重置筛选条件
+            resetFilters: function() {
+                document.getElementById('brand-filter').selectedIndex = 0;
+                document.getElementById('rule-name-filter').value = '';
+                
+                showToast('筛选条件已重置');
+            },
+            
+            // 导出规则
+            exportRules: function() {
+                this.showLoading();
+                
+                // 模拟导出过程
+                setTimeout(() => {
+                    this.hideLoading();
+                    showToast('规则导出成功');
+                }, 1200);
+            },
+            
+            // 跳转到指定页
+            goToPage: function(page) {
+                this.currentPage = page;
+                
+                // 更新分页按钮状态
+                this.updatePaginationStatus();
+                
+                // 这里可以添加实际的分页逻辑
+                console.log('跳转到第', page, '页');
+            },
+            
+            // 更新更新分页状态
+            updatePaginationStatus: function() {
+                // 更新页码按钮激活状态
+                document.querySelectorAll('.pagination-btn[data-page]').forEach(btn => {
+                    const page = parseInt(btn.getAttribute('data-page'));
+                    if (page === this.currentPage) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+                
+                // 更新上一页/下一页按钮状态
+                document.getElementById('prev-page').disabled = this.currentPage <= 1;
+                document.getElementById('next-page').disabled = this.currentPage >= this.totalPages;
+                
+                // 更新跳转输入框
+                document.getElementById('jump-page').value = this.currentPage;
+                document.getElementById('jump-page').max = this.totalPages;
+                
+                // 更新总条数和总页数显示
+                document.getElementById('total-count').textContent = this.totalCount;
+                document.getElementById('total-pages').textContent = this.totalPages;
+            },
+            
+            // 设置Tooltip功能
+            setupTooltip: function() {
+                const tooltip = document.getElementById('rule-tooltip');
+                const elements = document.querySelectorAll('.rule-description, .time-description');
+                
+                elements.forEach(el => {
+                    // 鼠标进入显示Tooltip
+                    el.addEventListener('mouseenter', (e) => {
+                        const fullText = el.getAttribute('data-full');
+                        if (!fullText) return;
+                        
+                        tooltip.textContent = fullText;
+                        tooltip.style.display = 'block';
+                        
+                        // 计算位置
+                        const rect = el.getBoundingClientRect();
+                        const tooltipWidth = tooltip.offsetWidth;
+                        const windowWidth = window.innerWidth;
+                        
+                        // 根据元素位置决定Tooltip显示在左侧还是右侧
+                        if (rect.right + tooltipWidth > windowWidth) {
+                            // 显示在左侧
+                            tooltip.style.left = (rect.left - tooltipWidth - 10) + 'px';
+                            tooltip.style.top = (rect.top + window.scrollY) + 'px';
+                            tooltip.classList.add('left');
+                            tooltip.classList.remove('right');
+                        } else {
+                            // 显示在右侧
+                            tooltip.style.left = (rect.right + 10) + 'px';
+                            tooltip.style.top = (rect.top + window.scrollY) + 'px';
+                            tooltip.classList.add('right');
+                            tooltip.classList.remove('left');
+                        }
+                    });
+                    
+                    // 鼠标离开隐藏Tooltip
+                    el.addEventListener('mouseleave', () => {
+                        tooltip.style.display = 'none';
+                    });
+                });
+            },
+            
+            // 显示加载状态
+            showLoading: function() {
+                document.getElementById('loading-overlay').classList.add('active');
+            },
+            
+            // 隐藏加载状态
+            hideLoading: function() {
+                document.getElementById('loading-overlay').classList.remove('active');
+            }
+        };
+        
+        // 页面加载完成后初始化应用
+        document.addEventListener('DOMContentLoaded', () => {
+            WarningRulesApp.init();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1943 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>预警规则设置 - 智鲲营销云</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Inter", "PingFang SC", "Microsoft YaHei", sans-serif;
+        }
+
+        /* 引入主页的CSS变量 */
+        :root {
+            --primary-color: #3B82F6;
+            --secondary-color: #93C5FD;
+            --accent-color: #DBEAFE;
+            --light-color: #F8FAFC;
+            --dark-color: #1E40AF;
+            --neutral-color: #64748B;
+            --text-color: #000000; /* 统一为黑色 */
+            --bg-light: #ffffff;
+            --card-bg: #ffffff;
+            --header-bg: #ffffff;
+            --footer-bg: #F8FAFC;
+            --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --hover-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            --border-radius: 12px;
+            --header-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --border-color: #E2E8F0;
+            --text-primary: #1E293B;
+            --text-secondary: #64748B;
+            --light-bg: #F8FAFC;
+            --danger-color: #EF4444;
+            --radius-sm: 6px;
+            --success-color: #10B981;
+            --text-light: #94A3B8;
+            --warning-color: #F59E0B;
+        }
+
+        .drawer-body,
+        .form-label,
+        .form-control,
+        .time-selection p,
+        .time-label,
+        .conditions-header,
+        .condition-type label,
+        .add-condition,
+        .value-input::placeholder {
+            font-size: 13px !important;
+        }
+
+        .form-hint {
+            display: block;
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-light);
+        }
+        
+        html, body {
+            height: 100%;
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow: hidden;
+        }
+
+        /* 抽屉容器 */
+        .drawer-container {
+            position: fixed;
+            top: 0;
+            right: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2000;
+            display: none; /* 默认隐藏 */
+        }
+        
+        .drawer-container.show {
+            display: flex; /* 显示时使用flex布局 */
+        }
+
+        .operator-select,
+        .metric-select {
+            font-size: 12.5px !important;
+        }
+
+        /* 遮罩层 */
+        .drawer-backdrop {
+            flex: 1;
+            background-color: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+        }
+
+        /* 抽屉内容 - 使用主页卡片样式 */
+        .drawer-content {
+            width: 100%;
+            max-width: 800px;
+            height: 100%;
+            background-color: var(--card-bg);
+            box-shadow: var(--card-shadow);
+            /* 去掉transform和transition属性，直接显示 */
+            display: flex;
+            flex-direction: column;
+            border-left: 1px solid var(--border-color);
+        }
+
+        .drawer-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 抽屉标题栏 - 与参考代码一致 */
+        .drawer-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-close {
+            background: none;
+            border: none;
+            font-size: 16px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .drawer-close:hover {
+            background-color: var(--light-bg);
+            color: var(--primary-color);
+        }
+
+        /* 表单内容区域 */
+        .drawer-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        /* 表单布局 */
+        .form-section {
+            margin-bottom: 24px;
+        }
+
+        /* 修改标题样式，去掉左侧边框和图标 */
+        .form-section-title {
+            font-size: 15px !important;
+            font-weight: 600;
+            margin-bottom: 16px;
+            color: var(--text-color);
+            padding-left: 0;
+            border-left: none;
+        }
+
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            min-width: 280px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .form-label.required::after {
+            content: '*';
+            color: #ef4444;
+            margin-left: 4px;
+        }
+
+        /* 表单控件样式 - 与参考代码一致 */
+        .form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding: 7px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            min-height: 34px;
+            width: 100%;
+            transition: border-color 0.3s;
+            color: var(--text-color);
+            background-color: white;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 2px rgba(147, 197, 253, 0.3);
+        }
+
+        /* 时间选择区域 - 使用主页浅色背景 */
+        .time-selection {
+            margin-top: 10px;
+            padding: 15px;
+            border-radius: var(--radius-sm);
+            background-color: var(--light-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .time-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .time-checkbox {
+            display: none;
+        }
+
+        .time-label {
+            display: inline-block;
+            width: 48px;
+            height: 32px;
+            line-height: 32px;
+            text-align: center;
+            border-radius: var(--radius-sm);
+            background-color: white;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .time-checkbox:checked + .time-label {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        /* 条件设置区域 - 与参考代码风格统一 */
+        .conditions-container {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            background-color: white;
+        }
+
+        .conditions-header {
+            padding: 12px 16px;
+            background-color: var(--light-color);
+            border-bottom: 1px solid var(--border-color);
+            font-weight: 500;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .condition-type {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .condition-type label {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+
+        .conditions-body {
+            padding: 16px;
+        }
+
+        .condition-group {
+            margin-bottom: 16px;
+        }
+
+        .condition-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+
+        .condition-item:hover {
+            border-color: var(--secondary-color);
+            background-color: var(--accent-color);
+        }
+
+        .value-with-unit {
+            display: flex;
+            align-items: center;
+            width: 120px;
+        }
+
+        .value-with-unit input {
+            width: 100%;
+        }
+
+        .unit {
+            margin-left: 5px;
+            color: var(--neutral-color);
+            white-space: nowrap;
+        }
+
+        .condition-remove {
+            color: var(--danger-color);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            margin-left: auto;
+        }
+
+        .condition-remove:hover {
+            background-color: #fee2e2;
+            color: #ef4444;
+        }
+
+        .toast-message {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 16px;
+            border-radius: var(--radius-sm);
+            box-shadow: var(--card-shadow);
+            z-index: 3000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.3s, transform 0.3s;
+            max-width: 280px;
+            font-size: 13px;
+        }
+
+        .toast-message.error {
+            background-color: var(--danger-color);
+        }
+
+        .toast-message.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        /* 添加条件按钮 - 使用主题色 */
+        .add-condition {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--primary-color);
+            background: none;
+            border: 1px dashed var(--primary-color);
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 13px;
+        }
+
+        .add-condition:hover {
+            background-color: var(--accent-color);
+        }
+
+        /* 抽屉底部操作按钮 - 与参考代码风格一致 */
+        .drawer-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            background-color: var(--footer-bg);
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: var(--radius-sm);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            font-size: 13px;
+        }
+
+        .btn i {
+            margin-right: 5px;
+            font-size: 12px;
+        }
+
+        /* 主按钮使用参考代码中的渐变 */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #152255, #244a68);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* 次要按钮样式 */
+        .btn-secondary {
+            background-color: var(--light-bg);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #eee;
+            border-color: #ccc;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+
+        /* 表单验证错误提示 */
+        .error-message {
+            color: #ef4444;
+            font-size: 12px;
+            margin-top: 4px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .form-control.error {
+            border-color: #ef4444;
+        }
+
+        /* 加载状态 - 使用主题色 */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--secondary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .drawer-content {
+                max-width: 100%;
+            }
+
+            .form-row {
+                gap: 16px;
+            }
+
+            .form-group {
+                min-width: 100%;
+            }
+
+            .drawer-body {
+                padding: 16px;
+            }
+
+            .drawer-footer {
+                padding: 12px 16px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        /* 新增样式：字数统计 */
+        .char-count {
+            text-align: right;
+            font-size: 12px;
+            color: var(--neutral-color);
+            margin-top: 4px;
+            transition: color 0.3s;
+        }
+        
+        .char-count.warning {
+            color: var(--danger-color);
+        }
+        
+        /* 新增样式：逻辑说明 */
+        .logic-explanation {
+            background-color: var(--light-bg);
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 16px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--secondary-color);
+        }
+
+        /* 新增样式：强制预警条件特殊标识 */
+        .force-warning {
+            border-left: 3px solid var(--warning-color);
+        }
+
+        .force-warning .conditions-header {
+            background-color: #FEF3C7;
+            color: var(--warning-color);
+        }
+        
+        /* 新增样式：条件开关 */
+        .condition-switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .condition-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .condition-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        
+        .condition-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .condition-slider {
+            background-color: var(--primary-color);
+        }
+        
+        input:checked + .condition-slider:before {
+            transform: translateX(20px);
+        }
+        
+        .condition-description {
+            flex: 1;
+            margin-left: 10px;
+        }
+        
+        .condition-description h4 {
+            font-size: 13px;
+            margin-bottom: 2px;
+            color: var(--text-primary);
+        }
+        
+        .condition-description p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .fixed-condition {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            margin-bottom: 10px;
+            background-color: white;
+            transition: all 0.3s;
+        }
+        
+        .fixed-condition:hover {
+            border-color: var(--secondary-color);
+            background-color: var(--accent-color);
+        }
+        
+        .fixed-condition.disabled .condition-value input {
+            background-color: #f5f5f5;
+            color: #999;
+            cursor: not-allowed;
+        }
+        
+        .condition-value {
+            display: flex;
+            align-items: center;
+            width: 120px;
+        }
+        
+        .condition-value input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
+        
+        .budget-container {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .budget-item {
+            flex: 1;
+        }
+        
+        .budget-input {
+            display: flex;
+            align-items: center;
+        }
+        
+        .budget-input input {
+            flex: 1;
+        }
+        
+        /* 新增校验相关样式 */
+        .condition-value input.error {
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
+        }
+        
+        .condition-hint {
+            font-size: 11px;
+            color: var(--text-light);
+            margin-top: 4px;
+            line-height: 1.3;
+        }
+        
+        .condition-hint.warning {
+            color: var(--warning-color);
+        }
+        
+        .condition-hint.error {
+            color: var(--danger-color);
+        }
+        
+        .dependency-hint {
+            background-color: #F0F9FF;
+            border: 1px solid #BAE6FD;
+            border-radius: var(--radius-sm);
+            padding: 8px 12px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .condition-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        
+        .condition-status {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background-color: var(--light-bg);
+        }
+        
+        .condition-status.valid {
+            background-color: #DCFCE7;
+            color: #166534;
+        }
+        
+        .condition-status.invalid {
+            background-color: #FEE2E2;
+            color: #991B1B;
+        }
+        
+        .range-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 6px;
+            font-size: 11px;
+            color: var(--text-light);
+        }
+        
+        .range-value {
+            padding: 2px 6px;
+            background-color: var(--light-bg);
+            border-radius: 4px;
+        }
+        
+        /* 新增样式：消耗金额输入类型选择 */
+        .cost-input-type {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 8px;
+        }
+        
+        .cost-type-option {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        
+        .cost-input-container {
+            display: flex;
+            align-items: center;
+            width: 120px;
+        }
+        
+        .cost-input-container input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
+        
+        /* 新增样式：指标分类说明 */
+        .metric-category {
+            background-color: var(--light-bg);
+            padding: 10px 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 12px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .metric-category.warning {
+            border-left-color: var(--warning-color);
+        }
+        
+        .metric-category h4 {
+            font-size: 13px;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="drawer-container" id="rule-drawer">
+        <!-- 遮罩层 -->
+        <div class="drawer-backdrop" id="drawer-backdrop"></div>
+        
+        <!-- 抽屉内容 -->
+        <div class="drawer-content">
+            <!-- 标题栏 -->
+            <div class="drawer-header">
+                <h3 class="drawer-title" id="drawer-title">新增预警规则</h3>
+                <button class="drawer-close" id="drawer-close">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <!-- 表单内容 -->
+            <div class="drawer-body">
+                <form id="rule-form">
+                    <!-- 基本信息区域 -->
+                    <div class="form-section">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label required" for="brand">品牌</label>
+                                <select class="form-control" id="brand" required>
+                                    <option value="" disabled selected>请选择品牌</option>
+                                    <option value="1">菲婷丝</option>
+                                    <option value="2">波司登</option>
+                                    <option value="3">施华蔻</option>
+                                    <option value="4">MD</option>
+                                </select>
+                                <div class="error-message" id="brand-error">请选择品牌</div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label required" for="rule-name">规则名称</label>
+                                <input type="text" class="form-control" id="rule-name" placeholder="请输入规则名称（最多30个字符）" maxlength="30" required>
+                                <div class="error-message" id="rule-name-error">请输入规则名称</div>
+                                <div class="char-count" id="rule-name-count">0/30</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 预警时间设置 -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">预警时间设置</h3>
+                        
+                        <div class="form-group">
+                            <div style="display: flex; gap: 20px; margin-bottom: 10px;">
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="radio" name="time-type" value="hourly" checked id="time-hourly">
+                                    <span>每小时</span>
+                                </label>
+                                <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                                    <input type="radio" name="time-type" value="specific" id="time-specific">
+                                    <span>指定时间点</span>
+                                </label>
+                            </div>
+                            
+                            <div class="time-selection" id="specific-time-container" style="display: none;">
+                                <p style="margin-bottom: 10px; font-size: 14px; color: #666;">请选择预警时间点（可多选）：</p>
+                                <div class="time-selector">
+                                    <!-- 时间选择器保持不变 -->
+                                </div>
+                                <div class="error-message" id="time-error">请至少选择一个时间点</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 免预警条件设置 -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">免预警条件设置</h3>
+                        
+                        <div class="logic-explanation">
+                            <strong>免预警逻辑：</strong>当满足以下条件时，对应指标将<strong>不发送</strong>预警通知。每个指标的免预警条件是独立的，仅针对该指标生效。
+                        </div>
+                        
+                        <!-- 花费类指标 -->
+                        <div class="metric-category">
+                            <h4>花费类指标</h4>
+                            <p>当花费金额较低或花费进度偏离较小时，不发送花费相关预警</p>
+                        </div>
+                        
+                        <div class="conditions-container">
+                            <div class="conditions-header">
+                                <span>花费类免预警条件</span>
+                            </div>
+                            
+                            <div class="conditions-body">
+                                <!-- 消耗金额低 -->
+                                <div class="fixed-condition" id="no-warn-cost-low">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="no-warn-cost-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>消耗金额免预警阈值</h4>
+                                            <span class="condition-status" id="no-warn-cost-status"></span>
+                                        </div>
+                                        <p>当消耗金额较低时，不发送花费相关预警通知</p>
+                                        
+                                        <div class="cost-input-type">
+                                            <label class="cost-type-option">
+                                                <input type="radio" name="cost-type" value="amount" checked id="cost-type-amount">
+                                                <span>固定金额</span>
+                                            </label>
+                                            <label class="cost-type-option">
+                                                <input type="radio" name="cost-type" value="percent" id="cost-type-percent">
+                                                <span>百分比</span>
+                                            </label>
+                                        </div>
+                                        
+                                        <div class="condition-hint" id="no-warn-cost-hint">范围：10 - 9,999,999 元</div>
+                                    </div>
+                                    <div class="cost-input-container">
+                                        <input type="number" id="no-warn-cost-value" placeholder="输入数值" min="10" max="9999999" disabled>
+                                        <span class="unit" id="no-warn-cost-unit">元</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 消耗进度低 -->
+                                <div class="fixed-condition" id="no-warn-progress-low">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="no-warn-progress-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>消耗进度偏离免预警阈值</h4>
+                                            <span class="condition-status" id="no-warn-progress-status"></span>
+                                        </div>
+                                        <p>当"|(实际消耗金额-预期消耗金额)|/预期消耗金额≤百分比"时，不发送花费进度预警</p>
+                                        <div class="condition-hint">范围：5% - 100%</div>
+                                        <div class="range-display">
+                                            <span>建议值：</span>
+                                            <span class="range-value">10%</span>
+                                            <span class="range-value">15%</span>
+                                            <span class="range-value">20%</span>
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="no-warn-progress-value" placeholder="百分比" min="5" max="100" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 效果类指标 -->
+                        <div class="metric-category" style="margin-top: 20px;">
+                            <h4>效果类指标</h4>
+                            <p>当效果指标在可接受范围内时，不发送该指标预警</p>
+                        </div>
+                        
+                        <div class="conditions-container">
+                            <div class="conditions-header">
+                                <span>效果类免预警条件</span>
+                            </div>
+                            
+                            <div class="conditions-body">
+                                <!-- ROI达标 -->
+                                <div class="fixed-condition" id="no-warn-roi-good">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="no-warn-roi-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>ROI免预警阈值</h4>
+                                            <span class="condition-status" id="no-warn-roi-status"></span>
+                                        </div>
+                                        <p>当"实际ROI≥目标ROI×百分比"时，即有偏离但可接受范围内，不发送ROI预警</p>
+                                        <div class="condition-hint">范围：30% - 99%</div>
+                                        <div class="range-display">
+                                            <span>建议值：</span>
+                                            <span class="range-value">70%</span>
+                                            <span class="range-value">80%</span>
+                                            <span class="range-value">90%</span>
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="no-warn-roi-value" placeholder="百分比" min="30" max="99" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- CPC达标 -->
+                                <div class="fixed-condition" id="no-warn-cpc-good">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="no-warn-cpc-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>CPC免预警阈值</h4>
+                                            <span class="condition-status" id="no-warn-cpc-status"></span>
+                                        </div>
+                                        <p>当"目标CPC≤实际CPC≤目标CPC×百分比"时，即有偏离但可接受范围内，不发送CPC预警</p>
+                                        <div class="condition-hint">范围：100% - 200%</div>
+                                        <div class="range-display">
+                                            <span>建议值：</span>
+                                            <span class="range-value">120%</span>
+                                            <span class="range-value">150%</span>
+                                            <span class="range-value">180%</span>
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="no-warn-cpc-value" placeholder="百分比" min="100" max="200" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 加购成本达标 -->
+                                <div class="fixed-condition" id="no-warn-addcart-good">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="no-warn-addcart-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>加购成本免预警阈值</h4>
+                                            <span class="condition-status" id="no-warn-addcart-status"></span>
+                                        </div>
+                                        <p>当"目标加购成本≤实际加购成本≤目标加购成本×百分比"时，即有偏离但可接受范围内，不发送加购成本预警</p>
+                                        <div class="condition-hint">范围：100% - 200%</div>
+                                        <div class="range-display">
+                                            <span>建议值：</span>
+                                            <span class="range-value">120%</span>
+                                            <span class="range-value">150%</span>
+                                            <span class="range-value">180%</span>
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="no-warn-addcart-value" placeholder="百分比" min="100" max="200" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 强制预警条件设置 -->
+                    <div class="form-section">
+                        <h3 class="form-section-title">强制预警条件设置</h3>
+                        
+                        <div class="logic-explanation">
+                            <strong>强制预警逻辑：</strong>当满足以下任一条件时，无论免预警条件如何，系统都将<strong>强制发送</strong>预警通知。主要用于严重异常情况。
+                        </div>
+                        
+                        <div class="metric-category warning">
+                            <h4>严重异常强制预警</h4>
+                            <p>以下条件满足任一即触发强制预警，忽略免预警条件</p>
+                        </div>
+                        
+                        <div class="conditions-container force-warning">
+                            <div class="conditions-header">
+                                <span>强制预警条件（满足任一条件则强制触发预警）</span>
+                            </div>
+                            
+                            <div class="conditions-body">
+                                <!-- 花费进度偏差大 -->
+                                <div class="fixed-condition" id="force-warn-spend-deviation">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="force-warn-spend-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>消耗进度严重偏离预期</h4>
+                                            <span class="condition-status" id="force-warn-spend-status"></span>
+                                        </div>
+                                        <p>当"|(实际消耗金额-预期消耗金额)|/预期消耗金额≥百分比"时，强制发送预警</p>
+                                        <div class="condition-hint">范围：5% - 100%，且需大于免预警进度阈值</div>
+                                        <div id="force-warn-spend-dependency" class="dependency-hint" style="display: none;">
+                                            必须大于免预警条件中的"消耗进度偏离阈值"
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="force-warn-spend-value" placeholder="百分比" min="5" max="100" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- ROI过低 -->
+                                <div class="fixed-condition" id="force-warn-roi-low">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="force-warn-roi-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>ROI严重偏离预期</h4>
+                                            <span class="condition-status" id="force-warn-roi-status"></span>
+                                        </div>
+                                        <p>当"实际ROI≤目标ROI×百分比"时，强制发送预警</p>
+                                        <div class="condition-hint">范围：0% - 100%，且需小于免预警ROI阈值</div>
+                                        <div id="force-warn-roi-dependency" class="dependency-hint" style="display: none;">
+                                            必须小于免预警条件中的"ROI免预警阈值"
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="force-warn-roi-value" placeholder="百分比" min="0" max="100" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- CPC过高 -->
+                                <div class="fixed-condition" id="force-warn-cpc-high">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="force-warn-cpc-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>CPC严重偏离预期</h4>
+                                            <span class="condition-status" id="force-warn-cpc-status"></span>
+                                        </div>
+                                        <p>当"实际CPC≥目标CPC×百分比"时，强制发送预警</p>
+                                        <div class="condition-hint">范围：100% - 1000%，且需大于免预警CPC阈值</div>
+                                        <div id="force-warn-cpc-dependency" class="dependency-hint" style="display: none;">
+                                            必须大于免预警条件中的"CPC免预警阈值"
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="force-warn-cpc-value" placeholder="百分比" min="100" max="1000" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                                
+                                <!-- 加购成本过高 -->
+                                <div class="fixed-condition" id="force-warn-addcart-high">
+                                    <label class="condition-switch">
+                                        <input type="checkbox" id="force-warn-addcart-toggle">
+                                        <span class="condition-slider"></span>
+                                    </label>
+                                    <div class="condition-description">
+                                        <div class="condition-header">
+                                            <h4>加购成本严重偏离预期</h4>
+                                            <span class="condition-status" id="force-warn-addcart-status"></span>
+                                        </div>
+                                        <p>当"实际加购成本≥目标加购成本×百分比"时，强制发送预警</p>
+                                        <div class="condition-hint">范围：100% - 1000%，且需大于免预警加购成本阈值</div>
+                                        <div id="force-warn-addcart-dependency" class="dependency-hint" style="display: none;">
+                                            必须大于免预警条件中的"加购免预警阈值"
+                                        </div>
+                                    </div>
+                                    <div class="condition-value">
+                                        <input type="number" id="force-warn-addcart-value" placeholder="百分比" min="100" max="1000" disabled>
+                                        <span class="unit">%</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+                
+                <!-- 提示信息 -->
+                <div class="form-group" style="margin-top: 20px;">
+                    <div class="form-hint" style="background: var(--light-bg); padding: 12px; border-radius: var(--radius-sm);">
+                        <strong>执行优先级说明：</strong><br>
+                        - 系统首先检查强制预警条件，当满足任一强制预警条件时，<strong>直接发送预警</strong><br>
+                        - 如果不满足强制预警条件，系统检查各指标的预警状态，如果某个指标触发了预警且未满足对应的免预警条件，则发送该指标预警<br>
+                        - 免预警条件按指标独立生效，一个指标满足免预警条件不影响其他指标的预警判断<br>
+                        - 优先级顺序：<strong>强制预警条件 > 各指标预警状态</strong><br>
+                        - 强制预警条件和免预警条件都是可选项，可以不配置<br>
+                        - 强制预警条件/免预警条件需要对应预警规则中设置相应指标才会触发(例如设置ROI免预警、强制预警,必须对应设置ROI目标)
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 底部操作按钮 -->
+            <div class="drawer-footer">
+                <button class="btn btn-secondary" id="cancel-btn">
+                    取消
+                </button>
+                <button class="btn btn-primary" id="save-btn">
+                    保存
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 加载状态 -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+    <!-- 提示消息 -->
+    <div class="toast-message" id="toast-message"></div>
+    
+    <script>
+        // 显示提示消息
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast-message');
+            toast.textContent = message;
+            toast.className = 'toast-message';
+            if (type === 'error') {
+                toast.classList.add('error');
+            }
+            toast.classList.add('show');
+            
+            // 3秒后自动隐藏
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 全局变量，存储当前操作类型和规则数据
+        let currentAction = 'add'; // add, edit, copy
+        let currentRuleData = null;
+        
+        // 初始化页面
+        function initPage() {
+            // 从URL参数获取操作类型和数据
+            const params = new URLSearchParams(window.location.search);
+            currentAction = params.get('action') || 'add';
+            
+            try {
+                const ruleDataStr = params.get('data');
+                if (ruleDataStr) {
+                    currentRuleData = JSON.parse(decodeURIComponent(ruleDataStr));
+                }
+            } catch (e) {
+                console.error('解析规则数据失败:', e);
+                currentRuleData = null;
+            }
+            
+            // 根据操作类型设置页面
+            setupPageByAction();
+            
+            // 设置事件监听
+            setupEventListeners();
+            
+            // 初始化规则名称字数统计
+            updateCharCount();
+            
+            // 初始化时间选择器
+            initTimeSelector();
+            
+            // 打开抽屉 - 使用show类而不是drawer-open
+            setTimeout(() => {
+                document.getElementById('rule-drawer').classList.add('show');
+            }, 100);
+        }
+        
+        // 初始化时间选择器
+        function initTimeSelector() {
+            const timeSelector = document.querySelector('.time-selector');
+            if (!timeSelector) return;
+            
+            // 清空现有内容
+            timeSelector.innerHTML = '';
+            
+            // 创建24小时时间选择器
+            for (let i = 0; i < 24; i++) {
+                const hour = i.toString().padStart(2, '0');
+                const timeId = `time-${hour}`;
+                
+                const timeElement = document.createElement('div');
+                timeElement.innerHTML = `
+                    <input type="checkbox" class="time-checkbox" id="${timeId}" value="${hour}:00">
+                    <label class="time-label" for="${timeId}">${hour}:00</label>
+                `;
+                timeSelector.appendChild(timeElement);
+            }
+        }
+        
+        // 根据操作类型设置页面
+        function setupPageByAction() {
+            const titleElement = document.getElementById('drawer-title');
+            
+            switch (currentAction) {
+                case 'add':
+                    titleElement.textContent = '新增预警规则';
+                    break;
+                    
+                case 'edit':
+                    titleElement.textContent = '编辑预警规则';
+                    if (currentRuleData) {
+                        populateFormData(currentRuleData);
+                    }
+                    break;
+                    
+                case 'copy':
+                    titleElement.textContent = '复制预警规则';
+                    if (currentRuleData) {
+                        // 复制数据，但规则名称加"（副本）"后缀
+                        const copiedData = JSON.parse(JSON.stringify(currentRuleData));
+                        copiedData.name = `${copiedData.name}（副本）`;
+                        populateFormData(copiedData);
+                    }
+                    break;
+            }
+        }
+        
+        // 填充表单数据
+        function populateFormData(data) {
+            // 基本信息
+            if (data.brand) document.getElementById('brand').value = data.brand;
+            if (data.name) {
+                document.getElementById('rule-name').value = data.name;
+                updateCharCount();
+            }
+            
+            // 预警时间设置
+            if (data.timeType === 'specific' && data.timePoints && data.timePoints.length > 0) {
+                document.getElementById('time-specific').checked = true;
+                document.getElementById('specific-time-container').style.display = 'block';
+                
+                // 选中对应的时间点
+                data.timePoints.forEach(time => {
+                    const hour = time.split(':')[0];
+                    const checkbox = document.getElementById(`time-${hour}`);
+                    if (checkbox) checkbox.checked = true;
+                });
+            } else {
+                document.getElementById('time-hourly').checked = true;
+            }
+            
+            // 免预警条件和强制预警条件的填充逻辑
+            if (data.noWarningConditions) {
+                // 消耗金额 - 处理金额类型
+                if (data.noWarningConditions.costLow) {
+                    const condition = document.getElementById('no-warn-cost-low');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    
+                    // 判断是金额还是百分比
+                    if (typeof data.noWarningConditions.costLow === 'string' && data.noWarningConditions.costLow.includes('%')) {
+                        document.querySelector('input[name="cost-type"][value="percent"]').checked = true;
+                        updateCostInputType();
+                        const value = parseFloat(data.noWarningConditions.costLow);
+                        condition.querySelector('.cost-input-container input').value = value;
+                        condition.querySelector('.cost-input-container input').disabled = false;
+                    } else {
+                        document.querySelector('input[name="cost-type"][value="amount"]').checked = true;
+                        updateCostInputType();
+                        condition.querySelector('.cost-input-container input').value = data.noWarningConditions.costLow;
+                        condition.querySelector('.cost-input-container input').disabled = false;
+                    }
+                    validateCondition('no-warn-cost');
+                }
+                
+                if (data.noWarningConditions.progressLow) {
+                    const condition = document.getElementById('no-warn-progress-low');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.noWarningConditions.progressLow;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('no-warn-progress');
+                }
+                
+                if (data.noWarningConditions.roiGood) {
+                    const condition = document.getElementById('no-warn-roi-good');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.noWarningConditions.roiGood;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('no-warn-roi');
+                }
+                
+                if (data.noWarningConditions.cpcGood) {
+                    const condition = document.getElementById('no-warn-cpc-good');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.noWarningConditions.cpcGood;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('no-warn-cpc');
+                }
+                
+                if (data.noWarningConditions.addcartGood) {
+                    const condition = document.getElementById('no-warn-addcart-good');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.noWarningConditions.addcartGood;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('no-warn-addcart');
+                }
+            }
+            
+            if (data.forceWarningConditions) {
+                if (data.forceWarningConditions.spendDeviation) {
+                    const condition = document.getElementById('force-warn-spend-deviation');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.forceWarningConditions.spendDeviation;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('force-warn-spend');
+                }
+                
+                if (data.forceWarningConditions.roiLow) {
+                    const condition = document.getElementById('force-warn-roi-low');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.forceWarningConditions.roiLow;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('force-warn-roi');
+                }
+                
+                if (data.forceWarningConditions.cpcHigh) {
+                    const condition = document.getElementById('force-warn-cpc-high');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.forceWarningConditions.cpcHigh;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('force-warn-cpc');
+                }
+                
+                if (data.forceWarningConditions.addcartHigh) {
+                    const condition = document.getElementById('force-warn-addcart-high');
+                    condition.querySelector('input[type="checkbox"]').checked = true;
+                    condition.querySelector('.condition-value input').value = data.forceWarningConditions.addcartHigh;
+                    condition.querySelector('.condition-value input').disabled = false;
+                    validateCondition('force-warn-addcart');
+                }
+            }
+            
+            // 触发依赖关系检查
+            checkAllDependencies();
+        }
+        
+        // 设置事件监听
+        function setupEventListeners() {
+            // 关闭抽屉
+            document.getElementById('drawer-close').addEventListener('click', closeDrawer);
+            document.getElementById('drawer-backdrop').addEventListener('click', closeDrawer);
+            document.getElementById('cancel-btn').addEventListener('click', closeDrawer);
+            
+            // 时间类型切换
+            document.getElementById('time-hourly').addEventListener('change', function() {
+                document.getElementById('specific-time-container').style.display = 'none';
+            });
+            
+            document.getElementById('time-specific').addEventListener('change', function() {
+                document.getElementById('specific-time-container').style.display = 'block';
+            });
+            
+            // 规则名称输入事件 - 更新字数统计
+            document.getElementById('rule-name').addEventListener('input', updateCharCount);
+            
+            // 消耗金额输入类型切换
+            document.querySelectorAll('input[name="cost-type"]').forEach(radio => {
+                radio.addEventListener('change', updateCostInputType);
+            });
+            
+            // 条件开关事件 - 修复版本
+            document.querySelectorAll('.condition-switch input').forEach(switchEl => {
+                switchEl.addEventListener('change', function() {
+                    const condition = this.closest('.fixed-condition');
+                    let input;
+                    
+                    // 特殊处理消耗金额条件，它有不同的输入容器
+                    if (condition.id === 'no-warn-cost-low') {
+                        input = condition.querySelector('.cost-input-container input');
+                    } else {
+                        input = condition.querySelector('.condition-value input');
+                    }
+                    
+                    // 启用或禁用输入框
+                    input.disabled = !this.checked;
+                    
+                    // 根据条件ID进行校验
+                    const conditionId = condition.id;
+                    if (conditionId.includes('no-warn')) {
+                        const type = conditionId.replace('no-warn-', '');
+                        validateCondition(`no-warn-${type}`);
+                    } else if (conditionId.includes('force-warn')) {
+                        const type = conditionId.replace('force-warn-', '');
+                        validateCondition(`force-warn-${type}`);
+                    }
+                    
+                    // 检查依赖关系
+                    checkAllDependencies();
+                });
+            });
+            
+            // 条件输入框变化事件 - 修复版本，确保所有输入框都能触发验证
+            document.querySelectorAll('.condition-value input').forEach(input => {
+                input.addEventListener('input', function() {
+                    const condition = this.closest('.fixed-condition');
+                    const conditionId = condition.id;
+                    
+                    if (conditionId.includes('no-warn')) {
+                        const type = conditionId.replace('no-warn-', '');
+                        validateCondition(`no-warn-${type}`);
+                    } else if (conditionId.includes('force-warn')) {
+                        const type = conditionId.replace('force-warn-', '');
+                        validateCondition(`force-warn-${type}`);
+                    }
+                    
+                    // 检查依赖关系
+                    checkAllDependencies();
+                });
+            });
+            
+            // 特别为消耗金额输入框添加事件监听
+            document.getElementById('no-warn-cost-value').addEventListener('input', function() {
+                validateCondition('no-warn-cost');
+                checkAllDependencies();
+            });
+            
+            // 保存规则
+            document.getElementById('save-btn').addEventListener('click', saveRule);
+        }
+        
+        // 更新消耗金额输入类型
+        function updateCostInputType() {
+            const costType = document.querySelector('input[name="cost-type"]:checked').value;
+            const input = document.getElementById('no-warn-cost-value');
+            const unit = document.getElementById('no-warn-cost-unit');
+            const hint = document.getElementById('no-warn-cost-hint');
+            
+            if (costType === 'amount') {
+                // 固定金额模式
+                input.placeholder = '整数金额';
+                input.min = 10;
+                input.max = 9999999;
+                unit.textContent = '元';
+                hint.textContent = '范围：10 - 9,999,999 元';
+            } else {
+                // 百分比模式
+                input.placeholder = '百分比';
+                input.min = 1;
+                input.max = 100;
+                unit.textContent = '%';
+                hint.textContent = '范围：1% - 100%';
+            }
+            
+            // 移除重新验证的调用，只在输入值变化时才验证
+            // 如果输入框有值，才进行验证
+            if (input.value) {
+                validateCondition('no-warn-cost');
+            } else {
+                // 如果没有值，清除状态显示
+                const statusElement = document.getElementById('no-warn-cost-status');
+                if (statusElement) {
+                    statusElement.textContent = '';
+                    statusElement.className = 'condition-status';
+                }
+                input.classList.remove('error');
+            }
+        }
+        
+        // 更新规则名称字数统计
+        function updateCharCount() {
+            const ruleNameInput = document.getElementById('rule-name');
+            const charCountElement = document.getElementById('rule-name-count');
+            const currentLength = ruleNameInput.value.length;
+            const maxLength = parseInt(ruleNameInput.getAttribute('maxlength'));
+            
+            // 更新字数显示
+            charCountElement.textContent = `${currentLength}/${maxLength}`;
+            
+            // 如果超过90%的字符限制，显示警告
+            if (currentLength > maxLength * 0.9) {
+                charCountElement.classList.add('warning');
+            } else {
+                charCountElement.classList.remove('warning');
+            }
+        }
+        
+        // 校验单个条件
+        function validateCondition(conditionType) {
+            let valueElement, statusElement;
+            
+            // 特殊处理消耗金额条件
+            if (conditionType === 'no-warn-cost') {
+                valueElement = document.getElementById(`${conditionType}-value`);
+                statusElement = document.getElementById(`${conditionType}-status`);
+            } else {
+                valueElement = document.getElementById(`${conditionType}-value`);
+                statusElement = document.getElementById(`${conditionType}-status`);
+            }
+            
+            if (!valueElement || valueElement.disabled) {
+                if (statusElement) {
+                    statusElement.textContent = '';
+                    statusElement.className = 'condition-status';
+                }
+                if (valueElement) valueElement.classList.remove('error');
+                return true;
+            }
+            
+            const value = parseFloat(valueElement.value);
+            let isValid = false;
+            let message = '';
+            
+            switch(conditionType) {
+                case 'no-warn-cost':
+                    const costType = document.querySelector('input[name="cost-type"]:checked').value;
+                    if (costType === 'amount') {
+                        isValid = !isNaN(value) && value >= 10 && value <= 9999999 && Number.isInteger(value);
+                        message = isValid ? '有效' : '需为10-9,999,999的整数';
+                    } else {
+                        isValid = !isNaN(value) && value >= 1 && value <= 100;
+                        message = isValid ? '有效' : '需为1-100之间的数值';
+                    }
+                    break;
+                    
+                case 'no-warn-progress':
+                    isValid = !isNaN(value) && value >= 5 && value <= 100;
+                    message = isValid ? '有效' : '需为5-100之间的数值';
+                    break;
+                    
+                case 'no-warn-roi':
+                    isValid = !isNaN(value) && value >= 30 && value <= 99;
+                    message = isValid ? '有效' : '需为30-99之间的数值';
+                    break;
+                    
+                case 'no-warn-cpc':
+                    isValid = !isNaN(value) && value >= 100 && value <= 200;
+                    message = isValid ? '有效' : '需为100-200之间的数值';
+                    break;
+                    
+                case 'no-warn-addcart':
+                    isValid = !isNaN(value) && value >= 100 && value <= 200;
+                    message = isValid ? '有效' : '需为100-200之间的数值';
+                    break;
+                    
+                case 'force-warn-spend':
+                    isValid = !isNaN(value) && value >= 5 && value <= 100;
+                    message = isValid ? '有效' : '需为5-100之间的数值';
+                    break;
+                    
+                case 'force-warn-roi':
+                    isValid = !isNaN(value) && value >= 0 && value <= 100;
+                    message = isValid ? '有效' : '需为0-100之间的数值';
+                    break;
+                    
+                case 'force-warn-cpc':
+                    isValid = !isNaN(value) && value >= 100 && value <= 1000;
+                    message = isValid ? '有效' : '需为100-1000之间的数值';
+                    break;
+                    
+                case 'force-warn-addcart':
+                    isValid = !isNaN(value) && value >= 100 && value <= 1000;
+                    message = isValid ? '有效' : '需为100-1000之间的数值';
+                    break;
+            }
+            
+            // 更新状态显示
+            if (statusElement) {
+                statusElement.textContent = message;
+                statusElement.className = isValid ? 'condition-status valid' : 'condition-status invalid';
+            }
+            
+            // 更新输入框样式
+            if (isValid) {
+                valueElement.classList.remove('error');
+            } else {
+                valueElement.classList.add('error');
+            }
+            
+            return isValid;
+        }
+        
+        // 检查所有依赖关系
+        function checkAllDependencies() {
+            // 检查消耗进度依赖关系
+            checkDependency(
+                'no-warn-progress', 
+                'force-warn-spend', 
+                'force-warn-spend-dependency',
+                (noWarnVal, forceWarnVal) => forceWarnVal > noWarnVal
+            );
+            
+            // 检查ROI依赖关系
+            checkDependency(
+                'no-warn-roi', 
+                'force-warn-roi', 
+                'force-warn-roi-dependency',
+                (noWarnVal, forceWarnVal) => forceWarnVal < noWarnVal
+            );
+            
+            // 检查CPC依赖关系
+            checkDependency(
+                'no-warn-cpc', 
+                'force-warn-cpc', 
+                'force-warn-cpc-dependency',
+                (noWarnVal, forceWarnVal) => forceWarnVal > noWarnVal
+            );
+            
+            // 检查加购成本依赖关系
+            checkDependency(
+                'no-warn-addcart', 
+                'force-warn-addcart', 
+                'force-warn-addcart-dependency',
+                (noWarnVal, forceWarnVal) => forceWarnVal > noWarnVal
+            );
+        }
+        
+        // 检查单个依赖关系
+        function checkDependency(noWarnType, forceWarnType, dependencyHintId, validationFn) {
+            let noWarnValueElement, forceWarnValueElement;
+            
+            // 特殊处理消耗金额条件
+            if (noWarnType === 'no-warn-cost') {
+                noWarnValueElement = document.getElementById(`${noWarnType}-value`);
+            } else {
+                noWarnValueElement = document.getElementById(`${noWarnType}-value`);
+            }
+            
+            forceWarnValueElement = document.getElementById(`${forceWarnType}-value`);
+            const dependencyHint = document.getElementById(dependencyHintId);
+            const forceWarnStatusElement = document.getElementById(`${forceWarnType}-status`);
+            
+            // 如果两个条件都启用
+            if (!noWarnValueElement.disabled && !forceWarnValueElement.disabled) {
+                const noWarnValue = parseFloat(noWarnValueElement.value);
+                const forceWarnValue = parseFloat(forceWarnValueElement.value);
+                
+                if (!isNaN(noWarnValue) && !isNaN(forceWarnValue)) {
+                    const isValid = validationFn(noWarnValue, forceWarnValue);
+                    
+                    // 显示依赖提示
+                    dependencyHint.style.display = 'block';
+                    
+                    if (!isValid) {
+                        forceWarnValueElement.classList.add('error');
+                        if (forceWarnStatusElement) {
+                            forceWarnStatusElement.textContent = '需满足依赖关系';
+                            forceWarnStatusElement.className = 'condition-status invalid';
+                        }
+                    } else {
+                        forceWarnValueElement.classList.remove('error');
+                        // 不覆盖原有的有效状态
+                        if (forceWarnStatusElement && forceWarnStatusElement.textContent === '需满足依赖关系') {
+                            forceWarnStatusElement.textContent = '有效';
+                            forceWarnStatusElement.className = 'condition-status valid';
+                        }
+                    }
+                } else {
+                    dependencyHint.style.display = 'block';
+                }
+            } else {
+                dependencyHint.style.display = 'none';
+            }
+        }
+        
+        // 表单验证
+        function validateForm() {
+            let isValid = true;
+            
+            // 品牌验证
+            const brand = document.getElementById('brand').value;
+            const brandError = document.getElementById('brand-error');
+            if (!brand) {
+                brandError.classList.add('show');
+                document.getElementById('brand').classList.add('error');
+                isValid = false;
+            } else {
+                brandError.classList.remove('show');
+                document.getElementById('brand').classList.remove('error');
+            }
+            
+            // 规则名称验证
+            const ruleName = document.getElementById('rule-name').value;
+            const ruleNameError = document.getElementById('rule-name-error');
+            if (!ruleName) {
+                ruleNameError.textContent = '请输入规则名称';
+                ruleNameError.classList.add('show');
+                document.getElementById('rule-name').classList.add('error');
+                isValid = false;
+            } else if (ruleName.length > 30) {
+                ruleNameError.textContent = '规则名称不能超过30个字符';
+                ruleNameError.classList.add('show');
+                document.getElementById('rule-name').classList.add('error');
+                isValid = false;
+            } else {
+                ruleNameError.classList.remove('show');
+                document.getElementById('rule-name').classList.remove('error');
+            }
+            
+            // 时间点验证（如果选择了指定时间点）
+            if (document.getElementById('time-specific').checked) {
+                const checkedTimes = document.querySelectorAll('#specific-time-container .time-checkbox:checked');
+                const timeError = document.getElementById('time-error');
+                
+                if (checkedTimes.length === 0) {
+                    timeError.classList.add('show');
+                    isValid = false;
+                } else {
+                    timeError.classList.remove('show');
+                }
+            }
+            
+            // 验证启用的条件值
+            const conditionTypes = [
+                'no-warn-cost', 'no-warn-progress', 'no-warn-roi', 'no-warn-cpc', 'no-warn-addcart',
+                'force-warn-spend', 'force-warn-roi', 'force-warn-cpc', 'force-warn-addcart'
+            ];
+            
+            conditionTypes.forEach(type => {
+                if (!validateCondition(type)) {
+                    isValid = false;
+                }
+            });
+            
+            // 验证依赖关系
+            checkAllDependencies();
+            
+            // 检查依赖关系错误
+            const dependencyErrors = document.querySelectorAll('.condition-status.invalid');
+            if (dependencyErrors.length > 0) {
+                isValid = false;
+            }
+            
+            return isValid;
+        }
+        
+        // 收集表单数据
+        function collectFormData() {
+            // 基本信息
+            const data = {
+                brand: document.getElementById('brand').value,
+                name: document.getElementById('rule-name').value,
+                action: currentAction,
+                id: currentRuleData ? currentRuleData.id : null
+            };
+            
+            // 时间设置
+            if (document.getElementById('time-hourly').checked) {
+                data.timeType = 'hourly';
+                data.timePoints = [];
+            } else {
+                data.timeType = 'specific';
+                data.timePoints = Array.from(document.querySelectorAll('#specific-time-container .time-checkbox:checked'))
+                    .map(checkbox => checkbox.value);
+            }
+            
+            // 免预警条件
+            data.noWarningConditions = {};
+            
+            // 消耗金额 - 处理金额类型
+            const noWarnCostLow = document.getElementById('no-warn-cost-low');
+            if (noWarnCostLow.querySelector('input[type="checkbox"]').checked) {
+                const costType = document.querySelector('input[name="cost-type"]:checked').value;
+                const value = noWarnCostLow.querySelector('.cost-input-container input').value;
+                if (costType === 'amount') {
+                    data.noWarningConditions.costLow = parseInt(value);
+                } else {
+                    data.noWarningConditions.costLow = `${value}%`;
+                }
+            }
+            
+            const noWarnProgressLow = document.getElementById('no-warn-progress-low');
+            if (noWarnProgressLow.querySelector('input[type="checkbox"]').checked) {
+                data.noWarningConditions.progressLow = noWarnProgressLow.querySelector('.condition-value input').value;
+            }
+            
+            const noWarnRoiGood = document.getElementById('no-warn-roi-good');
+            if (noWarnRoiGood.querySelector('input[type="checkbox"]').checked) {
+                data.noWarningConditions.roiGood = noWarnRoiGood.querySelector('.condition-value input').value;
+            }
+            
+            const noWarnCpcGood = document.getElementById('no-warn-cpc-good');
+            if (noWarnCpcGood.querySelector('input[type="checkbox"]').checked) {
+                data.noWarningConditions.cpcGood = noWarnCpcGood.querySelector('.condition-value input').value;
+            }
+            
+            const noWarnAddcartGood = document.getElementById('no-warn-addcart-good');
+            if (noWarnAddcartGood.querySelector('input[type="checkbox"]').checked) {
+                data.noWarningConditions.addcartGood = noWarnAddcartGood.querySelector('.condition-value input').value;
+            }
+            
+            // 强制预警条件
+            data.forceWarningConditions = {};
+            const forceWarnSpendDeviation = document.getElementById('force-warn-spend-deviation');
+            if (forceWarnSpendDeviation.querySelector('input[type="checkbox"]').checked) {
+                data.forceWarningConditions.spendDeviation = forceWarnSpendDeviation.querySelector('.condition-value input').value;
+            }
+            
+            const forceWarnRoiLow = document.getElementById('force-warn-roi-low');
+            if (forceWarnRoiLow.querySelector('input[type="checkbox"]').checked) {
+                data.forceWarningConditions.roiLow = forceWarnRoiLow.querySelector('.condition-value input').value;
+            }
+            
+            const forceWarnCpcHigh = document.getElementById('force-warn-cpc-high');
+            if (forceWarnCpcHigh.querySelector('input[type="checkbox"]').checked) {
+                data.forceWarningConditions.cpcHigh = forceWarnCpcHigh.querySelector('.condition-value input').value;
+            }
+            
+            const forceWarnAddcartHigh = document.getElementById('force-warn-addcart-high');
+            if (forceWarnAddcartHigh.querySelector('input[type="checkbox"]').checked) {
+                data.forceWarningConditions.addcartHigh = forceWarnAddcartHigh.querySelector('.condition-value input').value;
+            }
+            
+            return data;
+        }
+        
+        // 保存规则
+        function saveRule() {
+            if (!validateForm()) {
+                // 如果规则名称超过30个字符，显示错误提示
+                const ruleName = document.getElementById('rule-name').value;
+                if (ruleName && ruleName.length > 30) {
+                    showToast('规则名称不能超过30个字符', 'error');
+                } else {
+                    showToast('请完善表单信息', 'error');
+                }
+                return;
+            }
+            
+            // 显示加载状态
+            document.getElementById('loading-overlay').classList.add('active');
+            
+            // 收集表单数据
+            const formData = collectFormData();
+            
+            // 模拟API请求
+            setTimeout(() => {
+                // 隐藏加载状态
+                document.getElementById('loading-overlay').classList.remove('active');
+                
+                // 通过parent.postMessage与父页面通信
+                if (window.parent) {
+                    window.parent.postMessage({
+                        type: 'ruleSaved',
+                        data: formData,
+                        action: currentAction
+                    }, '*');
+                }
+                
+                // 关闭抽屉
+                closeDrawer();
+            }, 1000);
+        }
+        
+        // 关闭抽屉
+        function closeDrawer() {
+            document.getElementById('rule-drawer').classList.remove('show');
+            
+            // 延迟关闭页面，等待动画完成
+            setTimeout(() => {
+                // 通知父页面关闭弹窗
+                if (window.parent) {
+                    window.parent.postMessage({
+                        type: 'closeDrawer'
+                    }, '*');
+                }
+            }, 0);
+        }
+        
+        // 页面加载完成后初始化
+        document.addEventListener('DOMContentLoaded', initPage);
+    </script>
+</body>
+</html>
